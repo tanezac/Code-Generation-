@@ -1,0 +1,286 @@
+// Project P4: Code Generation 
+// README
+// Tan Nguyen
+// ntnhmc@umsystem.edu
+// May 4, 2022
+
+
+I don't have any incomplete requests from project 4
+
+Summary:
+Grammar Semantics 
+	• Delimiters: 
+	o { } . 
+	o Place Home 
+	• Operators: 
+		o << is the same as standard less than symbol (<) 
+		o <- is the same as greater than or equal to (>=)  
+		o / is a decrement operator. It reduces the value by one  
+			 Number may be immediate or stored at location indicated by identifier 
+	o  + is the same as standard plus sign 
+	o  % means divide the first number by the second number, truncating the remainder  
+			 e.g. 11 % 5 = 2 
+	o & means multiply the two numbers together 
+	• Note that operators have no precedence and are applied from left to right  
+	
+	• ‘Name identifier’ allocates memory for given identifier and initializes its value to zero 
+	• ‘Assign identifier M’ assigns the value of M to the given identifier 
+	• ‘{ If Identifier T W D }’  
+		o Means to do D if and only if ‘Identifier T W’ is true  
+	•  ‘{Do Again D T W }’ 
+		o Means to repeat D until ‘T W zero’ is false 
+			 If T is <<, repeat D until W is zero or more 
+			 If T is <-, repeat D until W is less than zero 
+	• ‘Spot number’ means to load the immediate number into the ACCumulator 
+	• ‘Spot identifier’ means to read in an integer from the user and store the value for the given new 
+	identifier (this operations allocated memory for the identifier) 
+	• ‘Show number’ means to write out the number to the monitor 
+	• ‘Show identifier’ means to write out the value of the given identifier to the monitor 
+	• ‘Move identifier’ means to load the given identifier’s value into the ACCumulator 
+	• ‘Flip identifier’ means to multiply the value for the given identifier by -1 and store the value  
+	• ‘Here number There’ means print the given number to the screen the given number of times (e.g. 
+	‘Here 3 There’ will print the number 3 to the screen 3 times) 
+
+I. What I have achieved in this project
+
+1. Use suffix rules or pattern rules in Makfile
+2. Invocation
+	./genCode       // read from the keyboard until simulated keyboard EOF , then CRTL + D to end.
+	./genCode filename // reads from filename 
+	
+If user input of three or more strings on the command line should also generate this error message:
+	Error: Expected 1 or no arguments
+	Try './codeGen -h' for more information.
+		
+I have provided the file to test the program. There are all 9 test files: test, test1, test2, test3, test4... test8
+
+WHEN YOU run the program, just enter the file name, DONT enter the prefix ".txt"
+
+3. Command line parsing
+	I add option -h: Help. It will be used to show how to run the program.
+		
+	------------------------------------------------------------------------------------
+	How to implement program::
+	Invocation:  ./genCode [file]
+	There are three ways to run the program:
+	1. ./genCode to prompt user to enter from keyboard.
+	2. ./genCode < [filename] to direct inout file to scanner exectuable program.
+	3. ./genCode [filename] // without .input suffix in file name.
+	--------------------------------------------------------------------------------------
+
+	
+4. Program output
+---------------------------------------------------------------------------------------------------------------------
+Testing file content in test1.txt:
+	 Name prog1
+	 Spot prog2
+	 Place
+	 Name id1
+	 Home
+	 Show prog2
+
+Output: 
+	Parser Success!
+	Semantic Check Started
+	Semantic Check Success!
+	The symbol table: IDENTIFIER: prog1 prog2 id1
+
+	Code Generator Success!
+	 <S> prog1 prog2
+	  <R>
+		<A> id1
+		<B>
+	  <E> prog2
+
+test1.asm:
+	LOAD 0
+	STORE prog1
+	READ prog2
+	LOAD 0
+	STORE id1
+	WRITE prog2
+	STOP
+	prog1 0
+	prog2 0
+	id1 0
+
+---------------------------------------------------------------------------------------------------------------------
+Testing file content in test2.txt:
+	Name p1
+	Spot p2
+	Place
+	Name p3
+	.
+	Here 4 There
+	.
+	Show p2
+	Home
+	Show p3
+
+Output:
+	Parser Success!
+	Semantic Check Started
+	Semantic Check Success!
+	The symbol table: IDENTIFIER: p1 p2 p3
+
+	Code Generator Success!
+	 <S> p1 p2
+	  <R>
+		<A> p3
+		<B> . .
+		  <C> 4
+		  <B> p2
+			<B>
+	  <E> p3
+
+test2.asm:
+	LOAD 0
+	STORE p1
+	READ p2
+	LOAD 0
+	STORE p3
+	LOAD 4
+	STORE TEMP1
+	BRZNEG Done1
+	Repeat1: WRITE TEMP1
+	SUB 1
+	BRPOS Repeat1
+	Done1: NOOP
+	WRITE p2
+	WRITE p3
+	STOP
+	p1 0
+	p2 0
+	p3 0
+	TEMP1 0
+
+
+--------------------------------------------------------------------------------------------------------------------
+Testing file content in test4.txt:
+	Name prog4
+	Spot prog5
+	Place
+	Name zd2
+	.
+	{ Do Again Flip prog4 << 9 + 1 }
+	.
+	Assign prog4 Flip prog5
+	Home
+	Show prog4
+	
+Output:
+	Parser Success!
+	Semantic Check Started
+	Semantic Check Success!
+	The symbol table: IDENTIFIER: prog4 prog5 zd2
+
+	Code Generator Success!
+	 <S> prog4 prog5
+	  <R>
+		<A> zd2
+		<B> . .
+		  <C> { }
+			<D> prog4
+			<T> <<
+			<W> 9 + 1
+		  <B> prog4
+			<D> prog5
+			<B>
+	  <E> prog4
+
+test4.asm:
+	LOAD 0
+	STORE prog4
+	READ prog5
+	LOAD 0
+	STORE zd2
+	REPEAT1: NOOP
+	LOAD prog4
+	MULT -1
+	STORE prog4
+	LOAD 9
+	ADD 1
+	BRNEG REPEAT1
+	LOAD prog5
+	MULT -1
+	STORE prog5
+	STORE prog4
+	WRITE prog4
+	STOP
+	prog4 0
+	prog5 0
+	zd2 0
+	TEMP1 0
+
+------------------------------------------------------------------------------------------------------------------
+Testing file content in test5.txt:
+	 Name prog4
+	Spot prog5
+	Place
+	Name zd2
+	.
+	{ If zd2 <- 5 . Show zd2 }
+	.
+	Home
+	Show prog4
+Output: 
+	Parser Success!
+	Semantic Check Started
+	Semantic Check Success!
+	The symbol table: IDENTIFIER: prog4 prog5 zd2
+
+	Code Generator Success!
+	 <S> prog4 prog5
+	  <R>
+		<A> zd2
+		<B> . .
+		  <C> { zd2 }
+			<T> <-
+			<W> 5 .
+			<D> zd2
+		  <B>
+	  <E> prog4
+
+test5.asm:
+	LOAD 0
+	STORE prog4
+	READ prog5
+	LOAD 0
+	STORE zd2
+	LOAD 5
+	STORE TEMP1
+	LOAD zd2
+	SUB TEMP1
+	BRZPOS DONE1
+	WRITE zd2
+	DONE1: NOOP
+	WRITE prog4
+	STOP
+	prog4 0
+	prog5 0
+	zd2 0
+	TEMP1 0
+
+
+--------------------------------------------------------------------------------------------------------------------
+II. BNF
+
+	<S>   ->    Name Identifier Spot Identifier <R> <E>  
+	<R>   ->    Place <A> <B> Home 
+	<E>   ->    Show Identifier 
+	<A>   ->    Name Identifier  
+	<B>   ->    empty |  .  <C> . <B> | <D> <B> 
+	<C>   ->    <F> | <G> 
+	<D>   ->    <H> | <J> | <K> | <L>  | <E> | <F> 
+	<F>   ->    { If  Identifier <T> <W> <D> } | { Do Again <D> <T> <W> } 
+	<G>   ->    Here Number There  
+	<T>   ->    <<  |  <-   
+	<V>   ->    +   |   %   |   &  
+	<H>   ->    /  <Z> 
+	<J>   ->    Assign Identifier <D> 
+	<K>   ->    Spot Number Show Number |  Move Identifer Show Identifier 
+	<L>   ->    Flip Identifier  
+	<W>   ->    Number  <V>  Number  |   Number . 
+	<Z>   ->    Identifier  |  Number               
+
+

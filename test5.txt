@@ -1,0 +1,9 @@
+Name prog4
+Spot prog5
+Place
+Name zd2
+.
+{ If zd2 <- 5 . Show zd2 }
+.
+Home
+Show prog4

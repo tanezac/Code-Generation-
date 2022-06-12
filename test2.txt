@@ -1,0 +1,10 @@
+Name p1 
+Spot p2 
+Place 
+Name p3 
+. 
+Here 4 There 
+. 
+Show p2  
+Home 
+Show p3 
